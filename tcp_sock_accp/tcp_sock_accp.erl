@@ -24,10 +24,14 @@ listen(Port) ->
 
 start_acceptors(ListenSock,N) ->
    Accept = fun() ->
-     gen_tcp:accept(ListenSock),
-     io:format("~nAccepted by PID = ~p",[self()])
+     {ok,ConnectionSock} = gen_tcp:accept(ListenSock),
+     Msg = io_lib:format("~nAccepted by PID = ~p",[self()]),
+     io:format([Msg]),
+     ok = gen_tcp:send(ConnectionSock,list_to_binary(Msg)),
+     ok = gen_tcp:close(ConnectionSock)     
    end,
    [ spawn( fun() -> Accept() end ) || _K <- lists:seq(1,N) ].
+   
     
  
    
